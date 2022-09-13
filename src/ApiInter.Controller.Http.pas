@@ -14,13 +14,17 @@ type
     FCustomHeaders: TStrings;
     FKeyFile: string;
     FKeyPassword: string;
+    FBearerToken:String;
     function SetUrl(Url: String): IClientHttp;
     function SetCertificateFile(CertificateFile: String): IClientHttp;
     function SetKeyFile(KeyFile: String): IClientHttp;
     function SetKeyPassword(KeyPassword: String): IClientHttp;
     function SetCustomHeaders(CustomHeaders: TStrings): IClientHttp;
-    function Get: TReply;
-    function Post(ASource: String): TReply;
+    function SetBearerToken(token: String): IClientHttp;
+    function Get: TReply; overload;
+    function Get(AStream:TMemoryStream): TReply; overload;
+    function Post(ASource: String): TReply;  overload;
+    function Post(ASource: TStrings): TReply; overload;
   public
     class function New: IClientHttp;
   end;
@@ -28,6 +32,19 @@ type
 implementation
 
 { TControllerHttp }
+
+function TControllerHttp.Get(AStream: TMemoryStream): TReply;
+begin
+  Result :=
+    TIndyClientHttp.New
+      .SetUrl(FUrl)
+      .SetCertificateFile(FCertificateFile)
+      .SetKeyFile(FKeyFile)
+      .SetKeyPassword(FKeyPassword)
+      .SetBearerToken(FBearerToken)
+      .SetCustomHeaders(FCustomHeaders)
+      .Get(AStream);
+end;
 
 class function TControllerHttp.New: IClientHttp;
 begin
@@ -38,6 +55,12 @@ function TControllerHttp.SetCustomHeaders(CustomHeaders: TStrings): IClientHttp;
 begin
   Result := Self;
   FCustomHeaders := CustomHeaders;
+end;
+
+function TControllerHttp.SetBearerToken(token: String): IClientHttp;
+begin
+  Result := Self;
+  FBearerToken := token;
 end;
 
 function TControllerHttp.SetCertificateFile(CertificateFile: String): IClientHttp;
@@ -72,6 +95,7 @@ begin
       .SetCertificateFile(FCertificateFile)
       .SetKeyFile(FKeyFile)
       .SetKeyPassword(FKeyPassword)
+      .SetBearerToken(FBearerToken)
       .SetCustomHeaders(FCustomHeaders)
       .Get;
 end;
@@ -84,6 +108,20 @@ begin
       .SetCertificateFile(FCertificateFile)
       .SetKeyFile(FKeyFile)
       .SetKeyPassword(FKeyPassword)
+      .SetBearerToken(FBearerToken)
+      .SetCustomHeaders(FCustomHeaders)
+      .Post(ASource);
+end;
+
+function TControllerHttp.Post(ASource: TStrings): TReply;
+begin
+  Result :=
+    TIndyClientHttp.New
+      .SetUrl(FUrl)
+      .SetCertificateFile(FCertificateFile)
+      .SetKeyFile(FKeyFile)
+      .SetKeyPassword(FKeyPassword)
+      .SetBearerToken(FBearerToken)
       .SetCustomHeaders(FCustomHeaders)
       .Post(ASource);
 end;
